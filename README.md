@@ -1,1 +1,19 @@
 # ECE4180-Project
+
+This project is a Raspberry Pi based alarm clock. When the alarm goes off, it repeatedly plays a random pattern of long and short tones. The user must input the correct pattern in order to turn off the alarm. A Raspberry Pi Model 2B is used running Raspberry Pi OS. A PiRTC PCF8523 Real Time Clock module with a button cell battery is used to keep track of time when the Pi is powered off. This module powers itself and is constantly keeping time. When the Pi powers on, it reads the time from the RTC module over I2C to then set the system time. The time is displayed on the 16x2 LCD display. The display has its contrast controlled by a 10k Ohm potentiometer. The display is driven in 4 bit mode with bits D4-D7 controlling the display. An LCD library from http://www.raspberrypi-spy.co.uk is used run the display, but I added an lcd_clear() function to the library. The buttons and buzzer are connected to various GPIO pins. 
+
+The code is written in python. On boot, cron is used to start running the alarm clock.
+```
+#edit Cron file
+crontab -e
+
+# Enter this line to run alarm on boot
+@reboot sh launcher.sh
+```
+Launcher.sh runs the main python script that then displays the time and sets off the alarm at the set times. The time can be set in the python file. The Raspberry Pi is connected to my home network, and I can easily SSH into it from my phone, so the alarm time can be set by editing the file from my phone. When the alarm sounds, the buzzer is controlled with a GPIO pin. The three buttons are used to turn off the alarm. Button 1 is to enter a short, Button 2 is to enter long, and Button 3 clears the user input. The user must input the correct order of long and short in order to turn off the alarm. The user input is displayed while the alarm is going off. Once the alarm is disabled, the display goes back to showing the time.
+
+Getting the display working took some work because many libraries I tried were for specific displays and didn't work for mine. Instead of a buzzer, I was going to use a speaker and an audio amplifier so that the alarm could have pitch and be better sounding, but in the process of making the circuit, I fed the amp too much power and it stopped working. Getting the RTC to work also took some work because the module is meant to connect directly to the pins on the Pi, but I needed to use a GPIO ribbon cable to connect to everything on the breadboard, that took the space where the PiRTC would go. So, I had to wire the PiRTC seperately. In order for the RTC to work, I needed to disable the fake hardware clock in the Pi (it is a software clock only when Pi is powered) and enable the PCF8523 over I2C.
+
+My project is different to the embedded systems we worked with in class because the Pi is really a Linux single board computer. It runs Raspberry Pi OS and has a whole desktop enviornment. Because of this, I had to connect it to a keyboard and monitor to get it set up on wifi, before connecting to it via SSH from my laptop to be able to write the code and control it. That is also why I needed to use cron to have it run the program on boot. The Pi is similar to other embedded systems in that it is low power and can really only do one thing at once. But, it is still a whole desktop computer. It's GPIO interface is similar to other embedded systems but it is fully controlled with Python through the OS and so there is less control of all of the registers like we did with code in class. The Pi is capable of more than most embedded hardware because it is a full computer but it has it's drawbacks with more overhead. If I had more resources I would have used a real color display that can show the time and the weather, as well as setting the alarm time from the screen. I would have also gotten another amp board to make the alarm sound better with different pitches and also be able to output normal alarm sounds. 
+
+<img src="circuit.svg">
